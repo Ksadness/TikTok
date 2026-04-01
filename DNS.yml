@@ -1,0 +1,146 @@
+port: 7890
+socks-port: 7891
+allow-lan: true
+mode: Rule
+log-level: info
+external-controller: :9090
+unified-delay: true
+tun:
+  enable: true
+  stack: system
+  mtu: 1380
+  strict-route: true
+  auto-route: true
+  auto-detect-interface: true
+  udp: true
+sniffer:
+  sniff:
+    TLS: {ports: [1-65535], override-destination: true}
+    HTTP: {ports: [1-65535], override-destination: true}
+  enable: true
+  skip-domain:
+    - Mijia Cloud
+    - dlg.io.mi.com
+  parse-pure-ip: false
+  force-dns-mapping: true
+  override-destination: true
+dns:
+  ipv6: false
+  enable: true
+  listen: 0.0.0.0:1053
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver:
+    - 223.5.5.5
+    - 223.6.6.6
+    - 119.29.29.29
+  nameserver:
+    - 223.5.5.5          # 阿里云 (优先国内解析)
+    - 119.29.29.29       # 腾讯云  
+    - https://1.1.1.1/dns-query
+    - https://1.0.0.1/dns-query
+    - https://dns.google/dns-query
+    - https://dns.alidns.com/resolve
+  nameserver-policy:
+    geosite:cn:
+      - 119.29.29.29
+      - 223.5.5.5
+    geosite:tiktok,youtube:
+      - https://1.1.1.1/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    geosite:
+      - gfw
+  fake-ip-filter:
+    # 局域网与标准本地保留域名
+    - "*.lan"
+    - "*.localdomain"
+    - "*.example"
+    - "*.invalid"
+    - "*.localhost"
+    - "*.test"
+    - "*.local"
+    - "*.home.arpa"
+    - "localhost.ptlogin2.qq.com"
+
+    # NTP 时间同步（防止时间校准失败）
+    - "time.*.com"
+    - "time.*.gov"
+    - "time.*.edu.cn"
+    - "time.*.apple.com"
+    - "time[1-7].*.com"
+    - "ntp.*.com"
+    - "ntp[1-7].*.com"
+    - "*.time.edu.cn"
+    - "*.ntp.org.cn"
+    - "+.pool.ntp.org"
+    - "time1.cloud.tencent.com"
+
+    # 系统服务与连接检测 (Apple/Microsoft)
+    - "swscan.apple.com"
+    - "mesu.apple.com"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "msftconnecttest.com"
+    - "*.ipv6.microsoft.com"
+
+    # STUN 与 P2P (解决游戏 NAT 类型问题)
+    - "stun.*.*"
+    - "stun.*.*.*"
+    - "+.srv.nintendo.net"
+    - "+.stun.playstation.net"
+    - "xbox.*.*.microsoft.com"
+    - "*.*.xboxlive.com"
+    - "teredo.*.*.*"
+    - "teredo.*.*"
+    - "speedtest.cros.wr.pvp.net"
+
+    # 游戏服务
+    - "+.wotgame.cn"
+    - "+.wggames.cn"
+    - "+.wowsgame.cn"
+    - "+.wargaming.net"
+    - "+.jjvip8.com"
+
+    # 音乐服务 (解除版权地域限制通常需要真 IP)
+    - "music.163.com"
+    - "*.music.163.com"
+    - "+.music.126.net"
+    - "*.126.net"
+    - "musicapi.taihe.com"
+    - "music.taihe.com"
+    - "songsearch.kugou.com"
+    - "trackercdn.kugou.com"
+    - "*.kuwo.cn"
+    - "api-jooxtt.sanook.com"
+    - "api.joox.com"
+    - "y.qq.com"
+    - "*.y.qq.com"
+    - "streamoc.music.tc.qq.com"
+    - "mobileoc.music.tc.qq.com"
+    - "isure.stream.qqmusic.qq.com"
+    - "dl.stream.qqmusic.qq.com"
+    - "aqqmusic.tc.qq.com"
+    - "amobile.music.tc.qq.com"
+    - "*.xiami.com"
+    - "+.music.migu.cn"
+
+    # 国内主流视频与资源 (防止 CDN 走代理导致卡顿)
+    - "www.douyu.com"
+    - "activityapi.huya.com"
+    - "activityapi.huya.com.w.cdngslb.com"
+    - "www.bilibili.com"
+    - "api.bilibili.com"
+    - "a.w.bilicdn1.com"
+    - "+.res.netease.com"
+
+
+    # ---  TikTok 业务与推流 (最高优先级) ---
+    # 确保所有 TikTok 相关域名和 CDN 强制走专用节点
+    - "*.tiktokcdn.com"
+    - "*.byteoversea.com"
+    - "rtmp.tiktok.com"    
+
+    # 地理位置过滤
+    - 'geosite:cn' # 重点：过滤所有中国域名（需配配合 geo-site 数据库）
